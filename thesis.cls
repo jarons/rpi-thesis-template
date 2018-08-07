@@ -353,7 +353,8 @@
  \def\adviser{\if \@projadviser *\@thadviser \else \@projadviser\fi}
  \def\coadviser{\if \@coprojadviser *\@cothadviser\else \@coprojadviser\fi}
  \def\cocoadviser{\if \@cocoprojadviser *\@cocothadviser\else \@cocoprojadviser\fi}
- \def\memberchair#1{\gdef\@memberchair{#1}}
+ \def\memberchair#1{\gdef\@memberchair{#1}} \memberchair{*}
+ \def\memberchair{\if \@memberchair *\@memberchair\else \@memberchair\fi}
  \def\memberone#1{\gdef\@memberone{#1}}
  \def\membertwo#1{\gdef\@membertwo{#1}}
  \def\memberthree#1{\gdef\@memberthree{#1}}
@@ -367,40 +368,29 @@
 \newcount\numcount
 \def\sigblock{
       \numcount=\numcomm
-      %\leftline{Approved by the\hfil}
-      \leftline{Examining Committee:\hfil}
-      \vskip 28pt \vfil
-      \hrule width 2.8in \hfil \vskip -3pt
-      \leftline{\adviser, \doctype Adviser\hfil}
+      \centerline{Approved by:}
+      \centerline{\adviser, Chair}
       \advance \numcount by -1
       \if \coadviser * \else % there's a co-adviser
-        \vskip 19pt\vfil\hrule width 2.8in\hfil\vskip -3pt
-        \leftline{\coadviser, \doctype Adviser\hfil}
+        \centerline{\coadviser, Chair}
         \advance \numcount by -1
       \fi
       \if \memberchair * \else % there's a different committee chair
-        \vskip 19pt\vfil\hrule width 2.8in\hfil\vskip -3pt
-        \leftline{\@memberchair, Committee Chair\hfil}
+        \centerline{\@memberchair, Committee Chair\hfil}
         \advance \numcount by -1
       \fi
       \ifnum\numcount > 0 %
-      \vskip 19pt\vfil\hrule width 2.8in\hfil\vskip -3pt
-      \leftline{\@memberone, Member\hfil} \fi %
+      \centerline{\@memberone} \fi %
       \advance \numcount by -1 \ifnum\numcount > 0 %
-      \vskip 19pt\vfil\hrule width 2.8in\hfil\vskip -3pt
-      \leftline{\@membertwo, Member\hfil} \fi %
+      \centerline{\@membertwo} \fi %
       \advance \numcount by -1 \ifnum\numcount > 0
-      \vskip 19pt\vfil\hrule width 2.8in\hfil\vskip -3pt
-      \leftline{\@memberthree, Member\hfil}  \fi
+      \centerline{\@memberthree}  \fi
       \advance \numcount by -1 \ifnum\numcount > 0
-      \vskip 19pt\vfil\hrule width 2.8in\hfil\vskip -3pt
-      \leftline{\@memberfour, Member\hfil}   \fi
+      \centerline{\@memberfour}   \fi
       \advance \numcount by -1 \ifnum\numcount > 0
-      \vskip 19pt\vfil\hrule width 2.8in\hfil\vskip -3pt
-      \leftline{\@memberfive, Member\hfil}  \fi
+      \centerline{\@memberfive}  \fi
       \advance \numcount by -1 \ifnum\numcount > 0
-      \vskip 19pt\vfil\hrule width 2.8in\hfil\vskip -3pt
-      \leftline{\@membersix, Member\hfil} \fi
+      \centerline{\@membersix} \fi
 }
 
  \def\titlepage{%
@@ -411,20 +401,19 @@
      \begin{singlespace}
      \begin{center}
          \parindent=0pt
-         {\large\uppercase\expandafter{\@thesistitle}}\\ [12pt]
-         By \\ [12pt]
-         \@author\\ [12pt]
-         A \doctype Submitted to the Graduate\\ [8pt]
-         Faculty of Rensselaer Polytechnic Institute\\ [8pt]
-         in Partial Fulfillment of the\\ [8pt]
-         Requirements for the Degree of\\ [8pt]
-         \uppercase\expandafter{\@degree}\\ [8pt]
-         Major Subject:~~\uppercase\expandafter{\@department}\\
-         \ifnum\numcomm < 7 \vskip 32pt \else \vskip 24pt \fi
-         \sigblock
-         \ifnum \numcomm < 7 \vskip 32pt \else \vskip 24pt \fi
+         {\large\uppercase\expandafter{\@thesistitle}}\\[20pt]
+         {\large\textbf{\@author}} \\[32pt] %
+         Submitted in Partial Fulfillment of the Requirements\\ %
+         for the Degree of\\[12pt]
+         \textit{\uppercase\expandafter{\@degree}} \\[22pt] 
+      %   \ifnum\numcomm < 7 \vskip 32pt \else \vskip 24pt \fi
+         \sigblock 
+      %   \ifnum \numcomm < 7 \vskip 32pt \else \vskip 24pt \fi
+         \vfill \includegraphics[width=1.55in]{rpi_logo.png}\\ %
+       %  \textit{Department of Mechanical, Aerospace, and Nuclear Engineering} \\
+         \textit{\@department}\\
          Rensselaer Polytechnic Institute\\
-         Troy, New York\\ [14pt]
+         Troy, New York\\[12pt]
          \ifnum\numcomm>6 \vskip -8pt \fi
          \@submitdate
      \end{center}
@@ -737,6 +726,44 @@
 
 \renewcommand{\bibalign}{\raggedright}  %  bibliography is ragged right
 % for fully justified bibliography: \renewcommand{\bibalign}{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% UPDATES FROM IEEETRAN.CLS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% CITATION AND BIBLIOGRAPHY COMMANDS
+%% 
+%% V1.6 no longer supports the older, nonstandard \shortcite and \citename setup stuff
+% 
+% 
+% Modify Latex2e \@citex to separate citations with "], ["
+\def\@citex[#1]#2{%
+  \let\@citea\@empty
+  \@cite{\@for\@citeb:=#2\do
+    {\@citea\def\@citea{], [}%
+     \edef\@citeb{\expandafter\@firstofone\@citeb\@empty}%
+     \if@filesw\immediate\write\@auxout{\string\citation{\@citeb}}\fi
+     \@ifundefined{b@\@citeb}{\mbox{\reset@font\bfseries ?}%
+       \G@refundefinedtrue
+       \@latex@warning
+         {Citation `\@citeb' on page \thepage \space undefined}}%
+       {\hbox{\csname b@\@citeb\endcsname}}}}{#1}}
+
+% V1.6 we create hooks for the optional use of Donald Arseneau's
+% cite.sty package. cite.sty is "smart" and will notice that the
+% following format controls are already defined and will not
+% redefine them. The result will be the proper sorting of the
+% citation numbers and auto detection of 3 or more entry "ranges" -
+% all in IEEE style:  [1], [2], [5]--[7], [12]
+% This also allows for an optional note, i.e., \cite[mynote]{..}.
+% If the \cite with note has more than one reference, the note will
+% be applied to the last of the listed references. It is generally
+% desired that if a note is given, only one reference is listed in
+% that \cite.
+% Thanks to Mr. Arseneau for providing the required format arguments
+% to produce the IEEE style.
+\def\citepunct{], [}
+\def\citedash{]--[}
 
 \endinput
 %%
